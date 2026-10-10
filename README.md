@@ -1,61 +1,119 @@
-# ASHA-SAATHI
-**An offline-first, voice-first copilot for ASHA/ANM community health workers.**
+<div align="center">
 
-## 1. Overview
-ASHA workers log visits on paper, often missing high-risk pregnancies, TB defaulters, and malnourished children. ASHA-SAATHI digitizes this process using a voice-first interface that works offline. It features an intelligent risk engine for the worker and a real-time outbreak radar for the health officer.
+# 🩺 ASHA-Saathi: The Voice-Powered Offline Copilot
 
-### Track: Healthcare & Community Well-being
+**Empowering the 1 million heroes of rural healthcare with AI.**
 
-## 2. Setup & Execution
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-blue?style=for-the-badge&logo=pwa)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_AI-orange?style=for-the-badge&logo=google)](https://cloud.google.com/vertex-ai)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-1B222D?style=for-the-badge&logo=prisma)](https://prisma.io)
 
-### Prerequisites
-- Node.js 18+
+[View Live Demo](#) · [Report Bug](#) · [Request Feature](#)
 
-### Installation
+</div>
+
+<br />
+
+ASHA-Saathi is a **Progressive Web App (PWA)** engineered specifically for India's Accredited Social Health Activists (ASHAs). It transforms the tedious, paper-based data entry process into a frictionless, **voice-first** experience that works flawlessly **without internet connectivity**.
+
+---
+
+## ✨ Key Features
+
+### 🎙️ Voice-to-Data AI (Offline-First)
+No more typing or filling out endless forms. Workers simply speak into their phones in Hindi or Hinglish (e.g., *"Sunita devi, 7 months pregnant, BP is 150/96"*). Our local fallback regex and **Google Gemini** integration extract the vitals, symptoms, and visit context instantly.
+
+### 📶 Zero-Internet Architecture
+Built for the deepest rural pockets. The app queues all logs locally using **Dexie.js** (IndexedDB). Once the device catches a signal, a background sync engine silently pushes the encrypted data to the cloud.
+
+### 🏆 Built-in Gamification
+ASHAs are the backbone of rural health, yet they are under-compensated and overworked. ASHA-Saathi introduces a gamified "Gold/Silver" tier system with daily targets and progression bars to drive motivation and engagement.
+
+### 📡 Outbreak Radar & Escalation
+Supervisors get a real-time heatmap of anomalies. If a worker logs a patient with a high fever and rash, the system's risk-engine triggers an automatic escalation to the Medical Officer, catching outbreaks before they spread.
+
+### 🪪 Digital ABHA Integration
+A beautiful, highly-accessible digital replica of the Ayushman Bharat Health Account (ABHA) ID card is available right in the app for instant verification and QR scanning.
+
+---
+
+## 🛠️ Technology Stack
+
+| Category | Technology |
+|---|---|
+| **Frontend** | Next.js 14 (App Router), React, Tailwind CSS v3, Shadcn UI |
+| **Backend** | Next.js Edge API Routes, Prisma ORM, PostgreSQL |
+| **Authentication**| NextAuth.js (Google OAuth) |
+| **AI / ML** | Google GenAI SDK (`@google/genai`) |
+| **Offline Storage**| Dexie.js (IndexedDB wrapper) + Web App Manifest (PWA) |
+
+---
+
+## 🚀 Local Installation & Setup
+
+Want to run ASHA-Saathi locally? Follow these steps:
+
+### 1. Clone the repository
 ```bash
-git clone <repo>
-cd asha-saathi
+git clone https://github.com/Mayank-iitj/Asha-Saathi.git
+cd Asha-Saathi
+```
+
+### 2. Install dependencies
+```bash
 npm install
+```
+
+### 3. Environment Variables
+Create a `.env.local` file in the root directory and add the following keys:
+```env
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your_super_secret_string"
+
+# Google OAuth (Create these in Google Cloud Console)
+GOOGLE_CLIENT_ID="your_google_client_id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+# Prisma Database (PostgreSQL)
+DATABASE_URL="postgresql://user:password@localhost:5432/ashasaathi"
+```
+*(Note: If you do not have Google API keys, you can still view the landing page, but the OAuth sign-in will fail).*
+
+### 4. Database Setup
+Push the Prisma schema to your local database:
+```bash
 npx prisma db push
+```
+
+### 5. Run the Development Server
+```bash
 npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser. 
 
-### Environment Variables
-Create a `.env` file in the root:
-```env
-ANTHROPIC_API_KEY=your_key_here # Or GEMINI_API_KEY. (Optional: App falls back to local rules if not set)
-```
+---
 
-## 3. Architecture
+## 🧠 How the Offline Sync Works
 
-```mermaid
-graph TD
-    A[ASHA Worker Mobile] -->|Voice/Text| B(Web Speech API)
-    B --> C[Next.js PWA Offline App]
-    C -->|Reads/Writes| D[(Dexie IndexedDB)]
-    C -->|Network Available| E{Sync Queue}
-    E -->|API /api/sync| F[Next.js API Routes]
-    F -->|/api/extract| G[LLM / Regex Fallback]
-    F -->|Prisma ORM| H[(SQLite / Supabase)]
-    H --> I[Officer Outbreak Radar]
-```
+1. **Capture:** Voice data is captured via the Web Speech API.
+2. **Extract:** The data is structured locally (or via Gemini if online).
+3. **Queue:** The structured JSON is saved into the browser's `IndexedDB` (using `Dexie.js`) with a status of `pending`.
+4. **Sync:** A custom `useSyncEngine` hook listens for the browser's `online` event. Upon connection, it flushes the queue to the Next.js API, verifying the JWT session via NextAuth.
+5. **Clear:** Once the server responds with 200 OK, the local records are marked as `synced` and cleared.
 
-## 4. Key Features
-1. **Voice Visit Logging:** ASHA worker taps mic and speaks normally.
-2. **Offline-First:** Works fully offline; queues visits and syncs when online.
-3. **Risk Engine:** Deterministic rule engine triggers Green/Amber/Red flags.
-4. **Outbreak Radar:** Officer dashboard flags symptom clusters in real-time.
+---
 
-## 5. 90-Second Demo Script
+## 🎨 Design Philosophy
 
-- **0:00 - Problem:** (Show the app home page) "ASHA workers use paper registers. We built a voice-first offline app to fix this."
-- **0:15 - Voice Log:** (Go to Log page, tap mic or use fallback) "Sunita devi, 7 months pregnant, BP is 150/96, having severe headache, Hb is 8."
-- **0:35 - Risk Flag:** (Show extracted card) "Notice how it caught the high BP and headache, flagged it RED for possible pre-eclampsia, and offers a referral slip."
-- **0:50 - Offline Mode:** (Toggle network offline) "If she loses connectivity, the app still works via IndexedDB." (Show offline chip).
-- **1:10 - Officer Dashboard:** (Navigate to `/radar` directly) "Meanwhile, the health officer sees this radar."
-- **1:25 - Simulate Outbreak:** (Click 'Inject Demo Outbreak' on Radar) "If cases spike, the anomaly detection engine catches the Dengue cluster instantly."
-- **1:35 - Impact:** "From the village to the block, data flows instantly, saving lives."
+The UI is built leveraging a premium, editorial design system inspired by top-tier SaaS platforms. It features:
+- A breathtaking radial-gradient marketing landing page.
+- Pastel category-coded taxonomy.
+- Strict lightweight typography (Inter/Labil Grotesk) to ensure readability on low-end mobile devices.
+- A fixed `pb-safe` bottom navigation bar optimized specifically for mobile thumb-reachability.
 
-## 6. Limitations & Ethics
-- **Decision Support Only:** This is NOT a diagnostic tool. A disclaimer is shown.
-- **Mocked Components:** Some features (like physical SMS gateway) are mocked for the demo. LLM extraction uses a local rule-based fallback if no API key is provided to ensure demo stability.
+---
+<div align="center">
+  <p>Built with ❤️ for Healthcare Hackathons.</p>
+</div>
