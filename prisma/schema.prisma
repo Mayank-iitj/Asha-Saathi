@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  role     String // ASHA, Supervisor, Officer
+  wardId   String?
+  language String  @default("hi")
+}
+
+model Ward {
+  id         String @id @default(uuid())
+  name       String
+  village    String
+  lat        Float
+  lng        Float
+  population Int
+}
+
+model Household {
+  id          String @id @default(uuid())
+  wardId      String
+  headName    String
+  addressHint String
+  lat         Float
+  lng         Float
+}
+
+model Beneficiary {
+  id          String    @id @default(uuid())
+  householdId String
+  name        String
+  age         Int
+  sex         String
+  category    String // pregnant_woman, lactating_mother, child_0_5, adult_chronic, elderly
+  consentAt   DateTime?
+  abhaMock    String?
+  eddDate     DateTime?
+  dob         DateTime?
+  createdBy   String
+}
+
+model Visit {
+  id                      String    @id @default(uuid())
+  clientUuid              String    @unique
+  beneficiaryId           String
+  ashaId                  String
+  visitType               String
+  vitalsJson              String
+  symptoms                String
+  medsJson                String
+  notes                   String
+  transcript              String
+  language                String
+  riskLevel               String
+  riskReasons             String
+  extractedConfidenceJson String
+  nextVisitDate           DateTime?
+  createdAt               DateTime  @default(now())
+  syncedAt                DateTime?
+}
+
+model RiskEvent {
+  id         String @id @default(uuid())
+  visitId    String
+  level      String
+  ruleId     String
+  message    String
+  status     String // open, referred, closed
+  assignedTo String?
+}
+
+model Schedule {
+  id            String    @id @default(uuid())
+  beneficiaryId String
+  kind          String // ANC, vaccine, TB, followup
+  dueDate       DateTime
+  doneAt        DateTime?
+}

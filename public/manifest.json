@@ -1,0 +1,17 @@
+{
+  "name": "ASHA Saathi",
+  "short_name": "ASHA Saathi",
+  "description": "An offline-first, voice-first copilot for ASHA/ANM community health workers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7FAF9",
+  "theme_color": "#0F766E",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
